@@ -181,7 +181,6 @@ gcc meu_programa.c -o meu_programa -pthread
 ## 📚 Recursos Adicionais
 
 - [Documentação oficial POSIX Threads](https://pubs.opengroup.org/onlinepubs/9699919799/basedefs/pthread.h.html)
-- [Tutorial pthread em português](https://www.inf.ufsc.br/~bosco.sobral/ensino/ine5645/pthreads.html)
 
 ---
 
