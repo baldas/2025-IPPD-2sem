@@ -32,11 +32,11 @@ Um **buffer circular** (ou **fila circular**) é uma estrutura de dados de taman
   ```
 - Um contador (`count`) controla quantos elementos existem no buffer no momento.
 
-📌 **Analogia:** imagine um **carrossel de 5 cadeiras**.  
-- O produtor sempre senta a próxima pessoa na **próxima cadeira vazia** (`in`).  
-- O consumidor sempre pega a próxima pessoa sentada na **cadeira seguinte** (`out`).  
-- Quando chegam no fim, voltam para a primeira cadeira.  
-- O carrossel nunca ultrapassa sua lotação (não pode ter mais que 5 pessoas).
+📌 **Analogia:** imagine um **estacionamento circular de 5 vagas** em frente ao laboratório de informática.  
+- O **produtor** é como carros chegando: sempre estacionam na **próxima vaga disponível** (`in`).  
+- O **consumidor** é como carros saindo: sempre saem da **vaga ocupada há mais tempo** (`out`).  
+- Quando chegam na última vaga (posição 4), o próximo carro vai para a primeira vaga (posição 0).  
+- O estacionamento tem **capacidade máxima** (não pode ter mais que 5 carros) e **ordem de chegada** (FIFO).
 
 ---
 
