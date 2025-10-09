@@ -107,7 +107,7 @@ int main(int argc, char **argv) {
    * trabalho seja distribuído entre todos os processos disponíveis.
    ****************************************************************************/
 
-  // PONTO DE MELHORIA 1: Geração de Pontos
+  // PASSO 1: Geração de Pontos
   // Atualmente, um único array `points` é alocado e preenchido com
   // TODAS as coordenadas. Isso consome muita memória e não é escalável.
   //
@@ -115,17 +115,17 @@ int main(int argc, char **argv) {
   // os pontos, cada processo deve gerar APENAS a porção de pontos pela
   // qual ele será responsável. Calcule um `start_index` e um `local_npts`
   // para cada processo.
-  double *points = NULL;
-  points = (double *)malloc((p_count * p_count * 2) * sizeof(double));
 
-  for (int yp = 0; yp < p_count; ++yp) {
-    double py = min_y + dy * yp / p_count;
-    for (int xp = 0; xp < p_count; ++xp) {
-      double px = min_x + dx * xp / p_count;
-      int lid = yp * p_count * 2 + xp * 2;
-      points[lid] = px;
-      points[lid + 1] = py;
-    }
+  double *points = malloc(p_count * p_count * 2 * sizeof(double));
+  int total_pts = p_count * p_count;
+  for (int i = 0; i < total_pts; ++i) {
+    int yp = i / p_count;  // linha
+    int xp = i % p_count;  // coluna
+    double px = min_x + dx * ((double)xp / p_count);
+    double py = min_y + dy * ((double)yp / p_count);
+    int lid = i * 2;
+    points[lid] = px;
+    points[lid + 1] = py;
   }
 
   // Barreira de sincronização. Útil para garantir que a medição de tempo
@@ -136,7 +136,7 @@ int main(int argc, char **argv) {
   // O número total de pontos
   int npts = p_count * p_count;
 
-  // PONTO DE MELHORIA 2: Alocação de Memória para Resultados
+  // PASSO 2: Alocação de Memória para Resultados
   // Assim como `points`, o array `mset` também é alocado para conter
   // TODOS os resultados. Isso deve ser mudado.
   //
@@ -144,32 +144,28 @@ int main(int argc, char **argv) {
   // suficiente apenas para os seus pontos locais (`local_npts`).
   int *mset = malloc(npts * sizeof(int));
 
-  // PONTO DE MELHORIA 3: Computação
+  // PASSO 3: Computação
   // A função `compute_mandelbrot` é chamada com a lista completa de pontos.
   //
   // SUA TAREFA: Chame esta função com a lista de pontos LOCAL de cada
   // processo (`local_points`, `local_npts`, `local_mset`).
   compute_mandelbrot(points, npts, mset);
 
-  // PONTO DE MELHORIA 4: Coleta de Resultados
-  // Após o cálculo local, os resultados estão espalhados entre os processos.
-  //
-  // SUA TAREFA: Use uma operação de comunicação coletiva, como `MPI_Gather`,
-  // para que o processo de rank 0 receba os `local_mset` de todos os
-  // outros processos e os junte em um array final `global_mset`.
-
   MPI_Barrier(MPI_COMM_WORLD);
   stop = MPI_Wtime();
 
-  // O processo rank 0 imprime o tempo de execução.
-  if (rank == 0) {
-    printf("Tempo gasto: %g s\n", stop - start);
-  }
+  // PASSO 4: Coleta de Resultados
+  // Após o cálculo local, os resultados estão espalhados entre os processos.
+  //
+  // SUA TAREFA: Use uma operação de comunicação coletiva `MPI_Gatherv`
+  // para que o processo de rank 0 receba os `local_mset` de todos os
+  // outros processos e os junte em um array final `global_mset`.
 
-  // PONTO DE MELHORIA 5: Escrita do Arquivo
+  // PASSO 5: Escrita do Arquivo
   // Apenas o processo rank 0, que agora possui todos os resultados no
   // `global_mset`, deve executar esta seção.
   if (rank == 0) {
+    printf("Tempo gasto: %g s\n", stop - start);
     FILE *fd = fopen("mandel.out", "w+");
     for (int yp = 0; yp < p_count; ++yp) {
       for (int xp = 0; xp < p_count; ++xp)
